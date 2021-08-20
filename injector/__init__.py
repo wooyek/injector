@@ -76,6 +76,11 @@ else:
     ) -> Dict[str, Any]:
         return _get_type_hints(obj, globalns, localns)
 
+try:
+    from typing import _BaseGenericAlias as BaseGenericAlias
+except ImportError:
+    class BaseGenericAlias:
+        pass
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
 __version__ = '0.18.4'
@@ -635,7 +640,10 @@ class Binder:
             if to is not None:
                 return InstanceProvider(to)
             return ClassProvider(base_type)
-
+        elif isinstance(interface, BaseGenericAlias):
+            if to is not None:
+                return InstanceProvider(to)
+            return ClassProvider(origin)
         else:
             raise UnknownProvider('couldn\'t determine provider for %r to %r' % (interface, to))
 
